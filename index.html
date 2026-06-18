@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Weather Dashboard</title>
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:
+linear-gradient(135deg,#0f172a,#1e293b,#111827);
+padding:20px;
+}
+
+.weather-app{
+width:420px;
+backdrop-filter:blur(20px);
+background:rgba(255,255,255,0.08);
+border:1px solid rgba(255,255,255,0.15);
+border-radius:25px;
+padding:30px;
+box-shadow:0 20px 50px rgba(0,0,0,0.4);
+color:white;
+}
+
+.top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:25px;
+}
+
+.title{
+font-size:1.7rem;
+font-weight:600;
+}
+
+.search-box{
+display:flex;
+gap:10px;
+margin-bottom:15px;
+}
+
+.search-box input{
+flex:1;
+padding:14px;
+border:none;
+outline:none;
+border-radius:12px;
+background:rgba(255,255,255,0.1);
+color:white;
+font-size:15px;
+}
+
+.search-box input::placeholder{
+color:#cbd5e1;
+}
+
+.search-box button{
+padding:14px 18px;
+border:none;
+cursor:pointer;
+border-radius:12px;
+background:white;
+color:#111827;
+font-weight:600;
+}
+
+.location-btn{
+width:100%;
+padding:13px;
+border:none;
+border-radius:12px;
+cursor:pointer;
+background:#2563eb;
+color:white;
+font-size:15px;
+margin-bottom:25px;
+}
+
+.weather-display{
+text-align:center;
+}
+
+.weather-display img{
+width:90px;
+margin-bottom:10px;
+}
+
+.temp{
+font-size:4rem;
+font-weight:600;
+line-height:1;
+}
+
+.city{
+font-size:1.4rem;
+margin-top:10px;
+}
+
+.condition{
+color:#cbd5e1;
+margin-top:5px;
+margin-bottom:25px;
+}
+
+.stats{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+}
+
+.card{
+background:rgba(255,255,255,0.08);
+padding:15px;
+border-radius:15px;
+text-align:center;
+}
+
+.card h4{
+font-size:13px;
+color:#cbd5e1;
+margin-bottom:8px;
+font-weight:400;
+}
+
+.card p{
+font-size:18px;
+font-weight:600;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="weather-app">
+
+<div class="top">
+<h2 class="title">Weather Dashboard</h2>
+</div>
+
+<div class="search-box">
+<input type="text" id="cityInput" placeholder="Search city...">
+<button onclick="getWeather()">Search</button>
+</div>
+
+<button class="location-btn" onclick="getLocationWeather()">
+📍 Current Location
+</button>
+
+<div id="weatherResult" class="weather-display">
+
+<h2>Search a City</h2>
+<p style="color:#cbd5e1;margin-top:10px;">
+Get real-time weather updates
+</p>
+
+</div>
+
+</div>
+
+<script>
+
+const apiKey = "YOUR_WEATHERAPI_KEY";
+
+async function getWeather(){
+
+const city=document.getElementById("cityInput").value;
+
+if(!city){
+alert("Enter city name");
+return;
+}
+
+fetchWeather(city);
+
+}
+
+function getLocationWeather(){
+
+navigator.geolocation.getCurrentPosition((position)=>{
+
+const lat=position.coords.latitude;
+const lon=position.coords.longitude;
+
+fetchWeather(`${lat},${lon}`);
+
+});
+
+}
+
+async function fetchWeather(location){
+
+const url=`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${location}&aqi=yes`;
+
+try{
+
+const response=await fetch(url);
+const data=await response.json();
+
+if(data.error){
+
+document.getElementById("weatherResult").innerHTML=
+`<h3>${data.error.message}</h3>`;
+
+return;
+
+}
+
+document.getElementById("weatherResult").innerHTML=`
+
+<img src="https:${data.current.condition.icon}">
+
+<div class="temp">${Math.round(data.current.temp_c)}°</div>
+
+<div class="city">
+${data.location.name}, ${data.location.country}
+</div>
+
+<div class="condition">
+${data.current.condition.text}
+</div>
+
+<div class="stats">
+
+<div class="card">
+<h4>Humidity</h4>
+<p>${data.current.humidity}%</p>
+</div>
+
+<div class="card">
+<h4>Wind</h4>
+<p>${data.current.wind_kph} km/h</p>
+</div>
+
+<div class="card">
+<h4>Feels Like</h4>
+<p>${data.current.feelslike_c}°C</p>
+</div>
+
+<div class="card">
+<h4>Visibility</h4>
+<p>${data.current.vis_km} km</p>
+</div>
+
+</div>
+
+`;
+
+}
+catch(error){
+
+document.getElementById("weatherResult").innerHTML=
+"<h3>Unable to fetch weather data</h3>";
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
